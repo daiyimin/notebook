@@ -78,10 +78,12 @@ Pods that are on different tiers of sensitivity, for example, an application pod
 同一个Node上，所有POD共享Node的Memory和CPU资源。因此，每个POD必须设置Memory和CPU request & limit，以防止一个有漏洞的POD被DOS攻击后，把整个Node的CPU和Memory耗尽。这样Node上的其它POD也得不到足够的Memory和CPU，无法正常运行。
 另外，参见[Quota](#quota)
 
-## POD Security Context 
-Security Context的是PodSpec的一部分，它描述了POD运行时的安全行为规范。
+When you specify the resource request for containers in a Pod, the <b>kube-scheduler</b> uses this information to decide which node to place the Pod on. When you specify a resource limit for a container, the <b>kubelet</b> enforces those limits so that the running container is not allowed to use more of that resource than the limit you set. The <b>kubelet</b> also reserves at least the request amount of that system resource specifically for that container to use. [^2]
 
-Security Context在Kubernetes中用于限制容器对宿主节点的可访问范围，以防止容器进行非法的系统级别操作，影响宿主节点或其他容器组。
+## POD Security Context 
+Security Context的是PodSpec的一部分，它描述了POD运行时的安全设置。
+
+Security Context在Kubernetes中用于描述容器所需要的对宿主节点的可访问范围，以防止容器进行不必要的系统级别操作，影响宿主节点或其他容器组。
 
 Security Context支持多种安全设定，包括访问权限控制（基于userID和groupID）、SELinux安全标签、Linux Capabilities（为容器分配部分特权）、AppArmor（安全模块，用于限制进程权限）以及Seccomp（过滤系统调用）等。
 
@@ -91,6 +93,15 @@ Security Context支持多种安全设定，包括访问权限控制（基于user
 
 如何利用Security Context实现这些内核安全限制，请看 [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 
+## OpenShift Security Context Constraint (SCC) [^3]
+Security Context Constraints 是 OpenShift 中的容器安全组件，用于限制 Pod 和容器运行时权限。通过 SCC，管理员可以定义哪些权限和访问能力可以被 Pod 使用。
+
+与 Security Context 的关系：
+* 关联：Security Context 定义了 Pod 或 Container 的安全设置，而 SCC 则是对这些设置的策略限制。SCC 通过匹配 Pod 的 Security Context 来决定是否允许该 Pod 运行。
+* 优先级：当 SCC 与 Security Context 发生冲突时，SCC 的设置将优先于 Security Context。例如，如果 SCC 禁止了某个用户运行具有特定权限的 Pod，即使该 Pod 的 Security Context 请求了这些权限，Pod 也将无法运行。
+![alt text](image.png)
+SCC阻止POD部署的例子：https://blog.csdn.net/cloudvtech/article/details/80202690。
+* 灵活性：通过定义多个 SCC，管理员可以为不同的用户或工作负载组提供不同的安全策略。这使得在保持集群安全性的同时，也能够满足不同的业务需求。
 
 ## POD Security Standard [^1]
 The Pod Security Standards 定义了三种安全策略： privileged, baseline and restricted。它们能够限制PodSpec中安全相关的字段的取值范围，包括但不限于SecurityContext中的字段。
@@ -152,3 +163,5 @@ kubectl label namespace verify-pod-security pod-security.kubernetes.io/enforce=b
 
 
 [^1]: https://kubernetes.io/blog/2021/12/09/pod-security-admission-beta/
+[^2]: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+[^3]: https://blog.51cto.com/u_15127570/2708420

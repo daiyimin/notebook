@@ -170,7 +170,7 @@ Webhook authentication is often used together with [client-go credential plugins
 ## Service Account in K8S
 A ServiceAccount provides an identity for processes that run in a Pod.
 A process inside a Pod can use the identity of its associated service account to authenticate to the cluster's API server.
-Service accounts are usually created automatically by the API server and associated with pods running in the cluster through the ServiceAccount Admission Controller. Bearer tokens are mounted into pods at well-known locations, and allow in-cluster processes to talk to the API server. Accounts may be explicitly associated with pods using the serviceAccountName field of a PodSpec.
+Service accounts are usually created automatically by the API server and associated with pods running in the cluster through the ServiceAccount Admission Controller. Bearer tokens are mounted into pods at well-known locations (by kubelet), and allow in-cluster processes to talk to the API server. Accounts may be explicitly associated with pods using the serviceAccountName field of a PodSpec.
 In API server, service account authenticator is an automatically enabled authenticator that uses signed bearer tokens to verify requests. 
 
 在 Kubernetes 中，服务帐户是一种为 Pod 内的进程提供的特殊的类型的凭据。这些凭据由 Kubernetes 自动管理，并允许 Pod 内的进程与 Kubernetes API 服务器进行交互。通过使用服务帐户，你可以更容易地为你的应用程序或工作负载提供必要的权限，同时保持对这些权限的严格控制。这有助于防止一个应用程序的不当行为或安全漏洞影响到其他应用程序。
